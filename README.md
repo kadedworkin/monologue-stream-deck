@@ -1,6 +1,6 @@
 # Monologue Push-to-Talk — Stream Deck Plugin
 
-Hold a Stream Deck button (or pedal) to activate [Monologue](https://monologue.app) dictation. Release to stop.
+Hold a Stream Deck button (or pedal) to activate [Monologue](https://monologue.to) dictation. Release to stop.
 
 Works on any button slot or the Stream Deck pedal.
 
