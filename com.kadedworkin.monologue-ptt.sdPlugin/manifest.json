@@ -1,0 +1,43 @@
+{
+  "Name": "Monologue Push-to-Talk",
+  "Version": "0.1.0",
+  "Author": "Kade Dworkin",
+  "Actions": [
+    {
+      "Name": "Push to Talk",
+      "UUID": "com.kadedworkin.monologue-ptt.ptt",
+      "Icon": "imgs/action-icon",
+      "Tooltip": "Hold to activate Monologue dictation",
+      "PropertyInspectorPath": "ui/pi.html",
+      "Controllers": ["Keypad", "Pedal"],
+      "States": [
+        {
+          "Image": "imgs/mic-idle",
+          "TitleAlignment": "bottom",
+          "FontSize": "10"
+        }
+      ],
+      "SupportedInMultiActions": false
+    }
+  ],
+  "Category": "Monologue",
+  "CategoryIcon": "imgs/category-icon",
+  "CodePath": "bin/plugin.js",
+  "Description": "Push-to-talk trigger for the Monologue macOS dictation app",
+  "Icon": "imgs/plugin-icon",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.7"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12.0"
+    }
+  ],
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "UUID": "com.kadedworkin.monologue-ptt"
+}
