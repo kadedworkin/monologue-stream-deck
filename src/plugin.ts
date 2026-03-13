@@ -1,32 +1,26 @@
 import streamDeck, { action, KeyDownEvent, KeyUpEvent, SingletonAction } from "@elgato/streamdeck";
 import { execFile } from "child_process";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const HELPER_PATH = resolve(__dirname, "../bin/key-helper");
-
-function sendKey(direction: "keydown" | "keyup", keycode: number): void {
-	execFile(HELPER_PATH, [direction, String(keycode)], (err) => {
+// Trigger Monologue via its URL scheme — reliable, no CGEvent/keyboard simulation.
+// monologue://record-dictation is a toggle: idle → start, recording → stop.
+// open -g keeps it backgrounded (no focus steal).
+function triggerMonologue(): void {
+	execFile("open", ["-g", "monologue://record-dictation"], (err) => {
 		if (err) {
-			streamDeck.logger.error(`key-helper error: ${err.message}`);
+			streamDeck.logger.error(`monologue URL scheme error: ${err.message}`);
 		}
 	});
 }
 
 @action({ UUID: "com.kadedworkin.monologue-ptt.ptt" })
 export class PushToTalk extends SingletonAction {
-	private keycode = 61; // Right Option key
-
 	override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-		const settings = ev.payload.settings as { keycode?: number };
-		this.keycode = settings?.keycode ?? 61;
-		sendKey("keydown", this.keycode);
+		triggerMonologue(); // start recording
 		await ev.action.setTitle("🎙");
 	}
 
 	override async onKeyUp(ev: KeyUpEvent): Promise<void> {
-		sendKey("keyup", this.keycode);
+		triggerMonologue(); // stop recording
 		await ev.action.setTitle("");
 	}
 }

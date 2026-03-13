@@ -7,7 +7,7 @@ import require$$3 from 'net';
 import require$$4 from 'tls';
 import require$$1 from 'crypto';
 import require$$0$2 from 'stream';
-import require$$7, { fileURLToPath } from 'url';
+import require$$7 from 'url';
 import require$$0 from 'zlib';
 import require$$0$1 from 'buffer';
 import fs, { existsSync, readFileSync } from 'node:fs';
@@ -15,7 +15,6 @@ import path, { join } from 'node:path';
 import { cwd } from 'node:process';
 import { randomUUID } from 'node:crypto';
 import { execFile as execFile$1 } from 'child_process';
-import { dirname, resolve } from 'path';
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -8033,12 +8032,13 @@ const streamDeck = {
     },
 };
 
-const __dirname$1 = dirname(fileURLToPath(import.meta.url));
-const HELPER_PATH = resolve(__dirname$1, "../bin/key-helper");
-function sendKey(direction, keycode) {
-    execFile$1(HELPER_PATH, [direction, String(keycode)], (err) => {
+// Trigger Monologue via its URL scheme — reliable, no CGEvent/keyboard simulation.
+// monologue://record-dictation is a toggle: idle → start, recording → stop.
+// open -g keeps it backgrounded (no focus steal).
+function triggerMonologue() {
+    execFile$1("open", ["-g", "monologue://record-dictation"], (err) => {
         if (err) {
-            streamDeck.logger.error(`key-helper error: ${err.message}`);
+            streamDeck.logger.error(`monologue URL scheme error: ${err.message}`);
         }
     });
 }
@@ -8057,15 +8057,12 @@ let PushToTalk = (() => {
             if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
             __runInitializers(_classThis, _classExtraInitializers);
         }
-        keycode = 61; // Right Option key
         async onKeyDown(ev) {
-            const settings = ev.payload.settings;
-            this.keycode = settings?.keycode ?? 61;
-            sendKey("keydown", this.keycode);
+            triggerMonologue(); // start recording
             await ev.action.setTitle("🎙");
         }
         async onKeyUp(ev) {
-            sendKey("keyup", this.keycode);
+            triggerMonologue(); // stop recording
             await ev.action.setTitle("");
         }
     });
