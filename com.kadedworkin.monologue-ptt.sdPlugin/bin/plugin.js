@@ -8035,13 +8035,48 @@ const streamDeck = {
 // Trigger Monologue via its URL scheme — reliable, no CGEvent/keyboard simulation.
 // monologue://record-dictation is a toggle: idle → start, recording → stop.
 // open -g keeps it backgrounded (no focus steal).
-function triggerMonologue() {
+function triggerRecordToggle() {
     execFile$1("open", ["-g", "monologue://record-dictation"], (err) => {
         if (err) {
             streamDeck.logger.error(`monologue URL scheme error: ${err.message}`);
         }
     });
 }
+// ─── Toggle On/Off ────────────────────────────────────────────────────────────
+// Each button press toggles Monologue recording on or off.
+let ToggleOnOff = (() => {
+    let _classDecorators = [action({ UUID: "com.kadedworkin.monologue-ptt.toggle" })];
+    let _classDescriptor;
+    let _classExtraInitializers = [];
+    let _classThis;
+    let _classSuper = SingletonAction;
+    (class extends _classSuper {
+        static { _classThis = this; }
+        static {
+            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(_classSuper[Symbol.metadata] ?? null) : void 0;
+            __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
+            _classThis = _classDescriptor.value;
+            if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
+            __runInitializers(_classThis, _classExtraInitializers);
+        }
+        isRecording = false;
+        async onWillAppear(ev) {
+            this.isRecording = false;
+            if (ev.action.isKey()) {
+                await ev.action.setTitle("");
+            }
+        }
+        async onKeyDown(ev) {
+            triggerRecordToggle();
+            this.isRecording = !this.isRecording;
+            await ev.action.setTitle(this.isRecording ? "● REC" : "");
+        }
+    });
+    return _classThis;
+})();
+// ─── Push to Talk ─────────────────────────────────────────────────────────────
+// Hold to record, release to stop. State-guarded to prevent double-fires
+// if the key is held down long enough to generate repeat events.
 let PushToTalk = (() => {
     let _classDecorators = [action({ UUID: "com.kadedworkin.monologue-ptt.ptt" })];
     let _classDescriptor;
@@ -8057,19 +8092,34 @@ let PushToTalk = (() => {
             if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
             __runInitializers(_classThis, _classExtraInitializers);
         }
+        isRecording = false;
+        async onWillAppear(ev) {
+            this.isRecording = false;
+            if (ev.action.isKey()) {
+                await ev.action.setTitle("");
+            }
+        }
         async onKeyDown(ev) {
-            triggerMonologue(); // start recording
+            if (this.isRecording)
+                return; // ignore repeat keyDown events
+            triggerRecordToggle(); // start recording
+            this.isRecording = true;
             await ev.action.setTitle("🎙");
         }
         async onKeyUp(ev) {
-            triggerMonologue(); // stop recording
+            if (!this.isRecording)
+                return; // nothing to stop
+            triggerRecordToggle(); // stop recording
+            this.isRecording = false;
             await ev.action.setTitle("");
         }
     });
     return _classThis;
 })();
+// ─── Registration ─────────────────────────────────────────────────────────────
+streamDeck.actions.registerAction(new ToggleOnOff());
 streamDeck.actions.registerAction(new PushToTalk());
 streamDeck.connect();
 
-export { PushToTalk };
+export { PushToTalk, ToggleOnOff };
 //# sourceMappingURL=plugin.js.map

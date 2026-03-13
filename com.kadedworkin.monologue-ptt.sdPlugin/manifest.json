@@ -1,13 +1,29 @@
 {
-  "Name": "Monologue Push-to-Talk",
-  "Version": "0.1.0",
+  "Name": "Monologue PTT",
+  "Version": "1.1.0",
   "Author": "Kade Dworkin",
   "Actions": [
+    {
+      "Name": "Toggle On/Off",
+      "UUID": "com.kadedworkin.monologue-ptt.toggle",
+      "Icon": "imgs/action-icon",
+      "Tooltip": "Toggle Monologue dictation on or off with each press.",
+      "PropertyInspectorPath": "ui/pi.html",
+      "Controllers": ["Keypad", "Pedal"],
+      "States": [
+        {
+          "Image": "imgs/mic-idle",
+          "TitleAlignment": "bottom",
+          "FontSize": "10"
+        }
+      ],
+      "SupportedInMultiActions": true
+    },
     {
       "Name": "Push to Talk",
       "UUID": "com.kadedworkin.monologue-ptt.ptt",
       "Icon": "imgs/action-icon",
-      "Tooltip": "Hold to activate Monologue dictation",
+      "Tooltip": "Hold to record, release to stop. True push-to-talk for Monologue.",
       "PropertyInspectorPath": "ui/pi.html",
       "Controllers": ["Keypad", "Pedal"],
       "States": [
